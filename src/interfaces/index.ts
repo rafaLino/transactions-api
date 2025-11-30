@@ -1,5 +1,7 @@
+import type { YearMonthDate } from '@/valueObjects/yearMonthDate'
+
 export interface ITransaction {
-	date: Date
+	date: string
 	items: IRecord[]
 }
 
@@ -12,4 +14,9 @@ export interface IRecord {
 	value: number
 	persist: boolean
 	installments?: IInstallment
+}
+
+export interface ITransactionInput {
+	date: string
+	items: IRecord[]
 }

@@ -21,7 +21,7 @@ const RecordSchema = new mongoose.Schema<IRecord>(
 
 const TransactionSchema = new mongoose.Schema<ITransaction>(
 	{
-		date: Date,
+		date: String,
 		items: [RecordSchema]
 	},
 	{ id: false }

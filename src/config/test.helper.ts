@@ -6,9 +6,9 @@ declare global {
 }
 
 async function createConnection() {
-	console.log('create connection...')
+	console.info('get connection...')
 	if (!process.env.MONGODB_URI) {
-		console.log('MONGODB_URI not defined!')
+		console.info('MONGODB_URI not defined!')
 		return
 	}
 
@@ -23,7 +23,7 @@ export async function seed(value: ITransaction) {
 		global.mongooseConnection.collection<ITransaction>('transactions')
 
 	await collection.insertOne(value)
-	console.log('seeded!')
+	console.info('seeded! ', value)
 }
 
 export async function clearCollection() {
@@ -32,9 +32,13 @@ export async function clearCollection() {
 		global.mongooseConnection.collection<ITransaction>('transactions')
 
 	await collection.deleteMany({})
-	console.log('cleared!')
+	console.info('cleared!')
 }
 
 export function parseBody<T = object>(body: string): ITransaction & T {
+	return JSON.parse(body)
+}
+
+export function parseError(body: string): { message: string } {
 	return JSON.parse(body)
 }

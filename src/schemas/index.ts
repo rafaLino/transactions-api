@@ -1,7 +1,8 @@
 import { z } from 'zod'
+import { YearMonthSchema } from '@/valueObjects/yearMonthDate'
 
 export const BodySchema = z.object({
-	date: z.iso.date(),
+	date: YearMonthSchema,
 	items: z.array(
 		z.object({
 			name: z.string(),
@@ -16,11 +17,14 @@ export const BodySchema = z.object({
 		})
 	)
 })
-
 export const DateParamSchema = z.object({
-	date: z.string()
+	date: YearMonthSchema
 })
 
 export const IdParamSchema = z.object({
 	id: z.string()
+})
+
+export const DateBodySchema = z.object({
+	date: YearMonthSchema
 })

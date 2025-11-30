@@ -13,7 +13,7 @@ const startMongoContainer = async () => {
 beforeAll(async () => {
 	mongoContainer = await startMongoContainer()
 	process.env.MONGODB_URI = `${mongoContainer.getConnectionString()}/db?directConnection=true`
-	console.log('MongoDB Testcontainer started at:', process.env.MONGODB_URI)
+	console.info('MongoDB Testcontainer started at:', process.env.MONGODB_URI)
 })
 
 afterAll(async () => {

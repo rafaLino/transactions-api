@@ -1,7 +1,17 @@
-import type { IInstallment, ITransaction } from '@/interfaces'
+import type {
+	IInstallment,
+	ITransaction,
+	ITransactionInput
+} from '@/interfaces'
+import { YearMonthDate } from '@/valueObjects/yearMonthDate'
 
-export function copyTransaction(date: Date, existingTransaction: ITransaction) {
-	date.setMonth(date.getMonth() + 1)
+export function copyTransaction(
+	date: YearMonthDate,
+	existingTransaction: ITransaction
+): ITransactionInput {
+	const newDate = YearMonthDate.New(date)
+	newDate.increaseMonth()
+
 	const newItems = existingTransaction.items.map((item) => ({
 		_id: undefined,
 		name: item.name,
@@ -10,9 +20,9 @@ export function copyTransaction(date: Date, existingTransaction: ITransaction) {
 		installments: updateInstallments(item.installments)
 	}))
 
-	const newTransaction: ITransaction = {
+	const newTransaction = {
 		items: newItems,
-		date: date
+		date: newDate.toString()
 	}
 	return newTransaction
 }

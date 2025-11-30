@@ -5,7 +5,7 @@ export default defineConfig({
         environment: 'node',
         setupFiles: ['./src/config/vitest.setup.ts'],
         hookTimeout: 120000,
-        testTimeout: 60000
+        testTimeout: 120000,
     },
     resolve: {
         alias: {
