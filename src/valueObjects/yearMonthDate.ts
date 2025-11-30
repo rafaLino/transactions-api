@@ -14,7 +14,7 @@ export class YearMonthDate {
 		this.date = new UTCDate(result.data)
 	}
 
-	static New(date: YearMonthDate) {
+	static Copy(date: YearMonthDate) {
 		const dateString = date.toString()
 		return new YearMonthDate(dateString)
 	}

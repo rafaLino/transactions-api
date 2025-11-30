@@ -1,4 +1,3 @@
-import { UTCDate } from '@date-fns/utc'
 import { copyTransaction } from './helpers/copyTransaction'
 import { Transaction } from './models/transaction'
 import { BodySchema, DateBodySchema, DateParamSchema } from './schemas'

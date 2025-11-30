@@ -9,7 +9,7 @@ export function copyTransaction(
 	date: YearMonthDate,
 	existingTransaction: ITransaction
 ): ITransactionInput {
-	const newDate = YearMonthDate.New(date)
+	const newDate = YearMonthDate.Copy(date)
 	newDate.increaseMonth()
 
 	const newItems = existingTransaction.items.map((item) => ({

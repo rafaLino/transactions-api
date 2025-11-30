@@ -1,5 +1,3 @@
-import type { YearMonthDate } from '@/valueObjects/yearMonthDate'
-
 export interface ITransaction {
 	date: string
 	items: IRecord[]
