@@ -1,22 +1,13 @@
-import {
-	MongoDBContainer,
-	type StartedMongoDBContainer
-} from '@testcontainers/mongodb'
 import { afterAll, beforeAll } from 'vitest'
+import { clearCollection } from './test.helper'
 
-let mongoContainer: StartedMongoDBContainer
-
-const startMongoContainer = async () => {
-	return new MongoDBContainer('mongo:8.0.10').withReuse().start()
-}
-
-beforeAll(async () => {
-	mongoContainer = await startMongoContainer()
-	process.env.MONGODB_URI = `${mongoContainer.getConnectionString()}/db?directConnection=true`
-	console.info('MongoDB Testcontainer started at:', process.env.MONGODB_URI)
+beforeAll(() => {
+	process.env.MODE = 'TEST'
+	process.env.DB_URI = `file:sqlite.db`
+	process.env.DB_TOKEN = 'test'
+	process.env.ALLOWED_ORIGIN = '*'
 })
 
 afterAll(async () => {
-	await mongoContainer.stop()
-	global.mongooseConnection?.close()
+	await clearCollection()
 })

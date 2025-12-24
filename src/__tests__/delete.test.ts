@@ -1,47 +1,39 @@
 import { test } from 'vitest'
 import { buildApp } from '@/app'
-import { clearCollection, seed } from '@/config/test.helper'
+import { seed } from '@/config/test.helper'
 
-test('should delete a transaction successfully', async (t) => {
+test('should delete a file successfully', async (t) => {
 	const app = await buildApp()
 
 	const date = '2025-11'
 	await seed({
-		date: date,
-		items: [
-			{
-				name: 'test',
-				value: 100,
-				persist: false
-			}
-		]
+		ref: date
 	})
 
 	const response = await app.inject({
 		method: 'DELETE',
-		url: `/transactions/${date}`
+		url: `/files/${date}`
 	})
 
 	t.expect(response.statusCode).toBe(204)
 
-	t.onTestFinished(async () => {
-		await clearCollection()
+	t.onTestFinished(() => {
 		app.close()
 	})
 })
 
-test('should not delete given a not found transaction', async (t) => {
+test('should not delete given a not found file', async (t) => {
 	const app = await buildApp()
 	const date = '2025-11'
 
 	const response = await app.inject({
 		method: 'DELETE',
-		url: `/transactions/${date}`
+		url: `/files/${date}`
 	})
 
 	t.expect(response.statusCode).toBe(404)
 
-	t.onTestFinished(async () => {
+	t.onTestFinished(() => {
 		app.close()
 	})
 })

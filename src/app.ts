@@ -8,7 +8,8 @@ import {
 	validatorCompiler,
 	type ZodTypeProvider
 } from 'fastify-type-provider-zod'
-import { dbConnector } from './db/dbConnector'
+import dbConnector from './db/dbTursoConnector'
+import { authentication } from './decorators/authenticationDecorator'
 import { routes } from './routes'
 
 export async function buildApp() {
@@ -18,26 +19,31 @@ export async function buildApp() {
 	app.setSerializerCompiler(serializerCompiler)
 
 	app.register(dbConnector, {
-		url: process.env.MONGODB_URI
+		url: process.env.DB_URI,
+		token: process.env.DB_TOKEN
 	})
 
+	app.register(authentication)
+
 	app.register(fastifyCors, {
-		origin: '*'
+		origin: process.env.ALLOWED_ORIGIN?.split(',')
 	})
 
 	app.register(fastifySwagger, {
 		openapi: {
 			info: {
-				title: 'Transactions API',
+				title: 'Files API',
 				version: '1.0.0'
 			}
 		},
 		transform: jsonSchemaTransform
 	})
 
-	app.register(ScalarApiReference, {
-		routePrefix: '/docs'
-	})
+	if (process.env.MODE === 'DEV') {
+		app.register(ScalarApiReference, {
+			routePrefix: '/docs'
+		})
+	}
 
 	app.register(routes)
 

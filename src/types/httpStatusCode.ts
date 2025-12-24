@@ -1,0 +1,8 @@
+export const HttpStatusCode = {
+	NOTFOUND: 404,
+	BADREQUEST: 400,
+	CREATED: 201,
+	NOCONTENT: 204,
+	OK: 200,
+	UNAUTHORIZED: 401
+}

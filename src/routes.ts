@@ -1,121 +1,99 @@
-import { copyTransaction } from './helpers/copyTransaction'
-import { Transaction } from './models/transaction'
-import { BodySchema, DateBodySchema, DateParamSchema } from './schemas'
+import { GetErrorMessage } from './helpers/getErrorMessage'
+import { FileRef } from './models/fileRef'
+import { SQL } from './repository/queries'
 import type { FastifyTypedInstance } from './types/fastify'
-import { YearMonthDate } from './valueObjects/yearMonthDate'
+import { HttpStatusCode } from './types/httpStatusCode'
+import { Client, LibsqlError } from '@libsql/client'
 
 export async function routes(app: FastifyTypedInstance) {
 	app.get(
-		'/transactions/:date',
+		'/files',
 		{
 			schema: {
-				tags: ['Transactions'],
-				params: DateParamSchema
+				tags: ['files']
+			}
+		},
+		async (_, reply) => {
+			const turso = app.getDecorator<Client>('turso')
+			const result = await turso.execute(SQL.GET_ALL)
+
+			return reply.code(HttpStatusCode.OK).send(result.rows)
+		}
+	)
+
+	app.get(
+		'/files/:ref',
+		{
+			schema: {
+				tags: ['files'],
+				params: FileRef
 			}
 		},
 		async (request, reply) => {
-			const date = new YearMonthDate(request.params.date)
-			const transaction = await Transaction.findOne({ date }).exec()
+			const turso = app.getDecorator<Client>('turso')
 
-			if (!transaction)
-				return reply.code(404).send({ message: 'Transaction not found' })
+			const result = await turso.execute({
+				sql: SQL.GET_ONE,
+				args: [request.params.ref]
+			})
 
-			return reply.code(200).send(transaction?.toJSON({ virtuals: true }))
+			const statusCode =
+				result.rows.length === 1 ? HttpStatusCode.OK : HttpStatusCode.NOTFOUND
+
+			return reply.code(statusCode).send(result.rows.at(0))
 		}
 	)
 
 	app.post(
-		'/transactions',
+		'/files',
 		{
 			schema: {
-				tags: ['Transactions'],
-				body: BodySchema
+				tags: ['files'],
+				body: FileRef
 			}
 		},
 		async (request, reply) => {
-			const date = new YearMonthDate(request.body.date)
+			const turso = app.getDecorator<Client>('turso')
+			try {
+				const result = await turso.execute({
+					sql: SQL.INSERT_ONE,
+					args: [request.body.ref]
+				})
+				const statusCode =
+					result.rowsAffected > 0
+						? HttpStatusCode.CREATED
+						: HttpStatusCode.BADREQUEST
 
-			const existingData = await Transaction.findOne({ date }).exec()
-
-			if (existingData) {
-				return reply
-					.code(400)
-					.send({ message: 'Already exist transaction with this date' })
+				return reply.code(statusCode).send()
+			} catch (error) {
+				const message = GetErrorMessage(error)
+				return reply.code(HttpStatusCode.BADREQUEST).send({ message })
 			}
-
-			const transaction = new Transaction(request.body)
-
-			await transaction.save()
-
-			return reply.code(201).send(transaction)
-		}
-	)
-
-	app.put(
-		'/transactions',
-		{
-			schema: {
-				tags: ['Transactions'],
-				body: BodySchema
-			}
-		},
-		async (request, reply) => {
-			const date = new YearMonthDate(request.body.date)
-			const result = await Transaction.updateOne({ date: date }, request.body)
-
-			if (result.modifiedCount > 0) {
-				return reply.code(204).send()
-			}
-
-			return reply.code(404).send({ message: 'Transaction not found' })
 		}
 	)
 
 	app.delete(
-		'/transactions/:date',
+		'/files/:ref',
 		{
 			schema: {
-				tags: ['Transactions'],
-				params: DateParamSchema
+				tags: ['files'],
+				params: FileRef
 			}
 		},
 		async (request, reply) => {
-			const date = new YearMonthDate(request.params.date)
-			const result = await Transaction.deleteOne({ date }).exec()
-			const statusCode = result.deletedCount > 0 ? 204 : 404
+			const turso = app.getDecorator<Client>('turso')
+
+			const result = await turso.execute({
+				sql: SQL.DELETE_ONE,
+				args: [request.params.ref]
+			})
+
+			const statusCode =
+				result.rowsAffected > 0
+					? HttpStatusCode.NOCONTENT
+					: HttpStatusCode.NOTFOUND
 
 			return reply.code(statusCode).send()
-		}
-	)
-
-	app.post(
-		'/transactions/next',
-		{
-			schema: {
-				tags: ['Transactions'],
-				body: DateBodySchema
-			}
-		},
-		async (request, reply) => {
-			const date = new YearMonthDate(request.body.date)
-			const existingTransaction = await Transaction.findOne({ date }).exec()
-
-			if (!existingTransaction) {
-				return reply
-					.code(404)
-					.send({ message: 'Transaction not found from the given date.' })
-			}
-
-			const newTransaction = copyTransaction(
-				date,
-				existingTransaction.toObject()
-			)
-
-			const transaction = new Transaction(newTransaction)
-
-			await transaction.save()
-
-			return reply.code(201).send(transaction)
 		}
 	)
 }

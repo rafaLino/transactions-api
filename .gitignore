@@ -133,3 +133,10 @@ dist
 # Serverless Webpack directories
 .webpack/
 
+
+## sqlite
+sqlite.db
+sqlite.db-changes
+sqlite.db-info
+sqlite.db-wal
+sqlite.db-wal-revert

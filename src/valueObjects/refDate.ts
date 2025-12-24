@@ -1,22 +1,22 @@
 import { UTCDate } from '@date-fns/utc'
 import { z } from 'zod'
 
-export const YearMonthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/)
-export type TYearMonth = z.infer<typeof YearMonthSchema>
+export const RefDateSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/)
+export type TYearMonth = z.infer<typeof RefDateSchema>
 
-export class YearMonthDate {
-	private date: UTCDate
+export class RefDate {
+	private readonly date: UTCDate
 
 	constructor(date: TYearMonth) {
-		const result = YearMonthSchema.safeParse(date)
-		if (!result.success) throw Error(result.error.message)
+		const result = RefDateSchema.safeParse(date)
+		if (!result.success) throw new Error(result.error.message)
 
 		this.date = new UTCDate(result.data)
 	}
 
-	static Copy(date: YearMonthDate) {
+	static Copy(date: RefDate) {
 		const dateString = date.toString()
-		return new YearMonthDate(dateString)
+		return new RefDate(dateString)
 	}
 
 	increaseMonth() {

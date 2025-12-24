@@ -6,42 +6,21 @@ import {
 	parseError,
 	seed
 } from '@/config/test.helper'
+import { TFileRef } from '@/models/fileRef'
 
-test('should create a transaction successfully', async (t) => {
+test('should create a file successfully', async (t) => {
 	const app = await buildApp()
 	const item = {
-		date: '2025-11',
-		items: [
-			{
-				name: 'test',
-				value: 100,
-				persist: false
-			}
-		]
+		ref: '2025-11'
 	}
 
 	const response = await app.inject({
 		method: 'POST',
-		url: '/transactions',
+		url: '/files',
 		body: item
 	})
 
 	t.expect(response.statusCode).toBe(201)
-	t.expect(response.body).toBeDefined()
-	const result = parseBody<{ _id: string }>(response.body)
-
-	t.expect(result.date).toBeDefined()
-	t.expect(result.items).toBeDefined()
-
-	t.expect(result._id).toBeDefined()
-
-	t.expect(result.items).toHaveLength(1)
-	const returnedItem = result.items[0]
-
-	t.expect(returnedItem.name).toEqual('test')
-	t.expect(returnedItem.value).toEqual(100)
-	t.expect(returnedItem.persist).toEqual(false)
-	t.expect(returnedItem.installments).toBeUndefined()
 
 	t.onTestFinished(async () => {
 		await clearCollection()
@@ -49,34 +28,20 @@ test('should create a transaction successfully', async (t) => {
 	})
 })
 
-test('should not allow create a transaction given the same date', async (t) => {
+test('should not allow create a file given the same date', async (t) => {
 	const app = await buildApp()
 
 	await seed({
-		date: '2025-11',
-		items: [
-			{
-				name: 'test',
-				value: 100,
-				persist: false
-			}
-		]
+		ref: '2025-11'
 	})
 
 	const item = {
-		date: '2025-11',
-		items: [
-			{
-				name: 'some thing',
-				value: 20,
-				persist: false
-			}
-		]
+		ref: '2025-11'
 	}
 
 	const response = await app.inject({
 		method: 'POST',
-		url: '/transactions',
+		url: '/files',
 		body: item
 	})
 
@@ -86,7 +51,7 @@ test('should not allow create a transaction given the same date', async (t) => {
 	const result = parseError(response.body)
 
 	t.expect(result).toBeDefined()
-	t.expect(result.message).toBe('Already exist transaction with this date')
+	t.expect(result.message).toBe('Already exist a file with this ref')
 
 	t.onTestFinished(async () => {
 		await clearCollection()
@@ -94,24 +59,17 @@ test('should not allow create a transaction given the same date', async (t) => {
 	})
 })
 
-test('should create and get the correct transaction', async (t) => {
+test('should create and get the correct file', async (t) => {
 	const app = await buildApp()
 
 	const date = '2025-11'
 	const item = {
-		date: date,
-		items: [
-			{
-				name: 'test',
-				value: 100,
-				persist: false
-			}
-		]
+		ref: date
 	}
 
 	const postResponse = await app.inject({
 		method: 'POST',
-		url: '/transactions',
+		url: '/files',
 		body: item
 	})
 
@@ -119,14 +77,14 @@ test('should create and get the correct transaction', async (t) => {
 
 	const getResponse = await app.inject({
 		method: 'GET',
-		url: `/transactions/${date}`
+		url: `/files/${date}`
 	})
 
 	t.expect(getResponse.body).toBeDefined()
-	const result = parseBody<{ _id: string }>(getResponse.body)
+	const result = parseBody<TFileRef>(getResponse.body)
 
 	t.expect(result).toBeDefined()
-	t.expect(result.date).toEqual('2025-11')
+	t.expect(result.ref).toEqual('2025-11')
 
 	t.onTestFinished(async () => {
 		await clearCollection()
