@@ -107,7 +107,6 @@ export async function routes(app: FastifyTypedInstance) {
 		async (request, reply) => {
 			const turso = app.getDecorator<Client>('turso')
 
-			console.log(Bucket)
 			const { statusCode: bucketStatusCode } = await Bucket.remove(
 				request.params.ref
 			)
