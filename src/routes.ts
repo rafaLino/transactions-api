@@ -1,10 +1,10 @@
 import type { Client } from '@libsql/client'
 import { GetErrorMessage } from './helpers/getErrorMessage'
 import { FileRef } from './models/fileRef'
+import { Bucket } from './repository/bucket'
 import { SQL } from './repository/queries'
 import type { FastifyTypedInstance } from './types/fastify'
 import { HttpStatusCode } from './types/httpStatusCode'
-
 export async function routes(app: FastifyTypedInstance) {
 	app.get(
 		'/files',
@@ -44,20 +44,44 @@ export async function routes(app: FastifyTypedInstance) {
 		}
 	)
 
+	app.get(
+		'/files/:ref/download',
+		{
+			schema: {
+				tags: ['files'],
+				params: FileRef
+			}
+		},
+		async (request, reply) => {
+			const { statusCode, body } = await Bucket.get(request.params.ref)
+
+			return reply.code(statusCode).send(body)
+		}
+	)
+
 	app.post(
 		'/files',
 		{
 			schema: {
 				tags: ['files'],
-				body: FileRef
+				consumes: ['multipart/form-data']
 			}
 		},
 		async (request, reply) => {
 			const turso = app.getDecorator<Client>('turso')
+
 			try {
+				const { statusCode: bucketStatusCode, ref } = await Bucket.put(request)
+
+				if (bucketStatusCode !== HttpStatusCode.CREATED) {
+					return reply
+						.code(bucketStatusCode)
+						.send({ message: 'File not saved!' })
+				}
+
 				const result = await turso.execute({
 					sql: SQL.INSERT_ONE,
-					args: [request.body.ref]
+					args: [ref]
 				})
 				const statusCode =
 					result.rowsAffected > 0
@@ -82,6 +106,17 @@ export async function routes(app: FastifyTypedInstance) {
 		},
 		async (request, reply) => {
 			const turso = app.getDecorator<Client>('turso')
+
+			console.log(Bucket)
+			const { statusCode: bucketStatusCode } = await Bucket.remove(
+				request.params.ref
+			)
+
+			if (bucketStatusCode !== HttpStatusCode.NOCONTENT) {
+				return reply
+					.code(bucketStatusCode)
+					.send({ message: 'Something went wrong' })
+			}
 
 			const result = await turso.execute({
 				sql: SQL.DELETE_ONE,

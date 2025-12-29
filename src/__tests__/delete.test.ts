@@ -1,6 +1,12 @@
-import { test } from 'vitest'
+import { test, vi } from 'vitest'
 import { buildApp } from '@/app'
 import { seed } from '@/config/test.helper'
+
+vi.mock('@/repository/bucket', () => ({
+	Bucket: {
+		remove: vi.fn(() => ({ statusCode: 204 }))
+	}
+}))
 
 test('should delete a file successfully', async (t) => {
 	const app = await buildApp()

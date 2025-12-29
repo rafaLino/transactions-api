@@ -21,12 +21,14 @@
 	"dependencies": {
 		"@date-fns/utc": "^2.1.1",
 		"@fastify/cors": "^11.1.0",
+		"@fastify/multipart": "^9.3.0",
 		"@fastify/swagger": "^9.6.1",
 		"@libsql/client": "^0.15.15",
 		"@scalar/fastify-api-reference": "^1.40.0",
 		"fastify": "^5.6.2",
 		"fastify-plugin": "^5.1.0",
 		"fastify-type-provider-zod": "^6.1.0",
+		"undici": "^7.16.0",
 		"zod": "^4.1.13"
 	},
 	"devDependencies": {

@@ -1,4 +1,4 @@
-import { test } from 'vitest'
+import { test, vi } from 'vitest'
 import { buildApp } from '@/app'
 import {
 	clearCollection,
@@ -8,16 +8,29 @@ import {
 } from '@/config/test.helper'
 import type { TFileRef } from '@/models/fileRef'
 
+vi.mock('@/repository/bucket', () => ({
+	Bucket: {
+		put: vi.fn(() => ({ statusCode: 201, ref: '2025-11' }))
+	}
+}))
+
 test('should create a file successfully', async (t) => {
 	const app = await buildApp()
 	const item = {
 		ref: '2025-11'
 	}
 
+	const formData = new FormData()
+	formData.append('ref', item.ref)
+	formData.append('csv', 'some csv content')
+
 	const response = await app.inject({
 		method: 'POST',
 		url: '/files',
-		body: item
+		body: formData,
+		headers: {
+			'content-type': 'multipart/form-data'
+		}
 	})
 
 	t.expect(response.statusCode).toBe(201)

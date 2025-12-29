@@ -1,4 +1,5 @@
 import { fastifyCors } from '@fastify/cors'
+import { fastifyMultipart } from '@fastify/multipart'
 import { fastifySwagger } from '@fastify/swagger'
 import ScalarApiReference from '@scalar/fastify-api-reference'
 import { fastify } from 'fastify'
@@ -24,6 +25,8 @@ export async function buildApp() {
 	})
 
 	app.register(authentication)
+
+	app.register(fastifyMultipart)
 
 	app.register(fastifyCors, {
 		origin: process.env.ALLOWED_ORIGIN?.split(',')
