@@ -30,7 +30,7 @@ export async function createTable() {
 export async function seed(value: TFileRef) {
 	await createConnection()
 	await globalThis.dbConnection.execute({
-		sql: SQL.INSERT_ONE,
+		sql: SQL.files.INSERT_ONE,
 		args: [value.ref]
 	})
 
