@@ -30,7 +30,7 @@ export async function buildApp() {
 
 	app.register(fastifyCors, {
 		origin: process.env.ALLOWED_ORIGIN?.split(','),
-		methods: ['GET', 'POST', 'DELETE', 'OPTIONS']
+		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 	})
 
 	app.register(fastifySwagger, {
